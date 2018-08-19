@@ -27,4 +27,8 @@
 
     </style>
 
+    <style name="AppThemeProgress">
+        <item name="colorAccent">@color/colorDialogLine</item> <!-- Whatever color you want-->
+    </style>
+
 </resources>
