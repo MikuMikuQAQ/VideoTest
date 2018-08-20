@@ -8,8 +8,9 @@
         tools:context=".MainActivity">
 
     <FrameLayout
+            android:id="@+id/video_player_frameLayout"
             android:layout_width="match_parent"
-            android:layout_height="200dp">
+            android:layout_height="250dp">
 
         <FrameLayout
                 android:layout_width="match_parent"
@@ -86,6 +87,41 @@
                         android:background="@android:color/transparent"
                         android:src="@drawable/full_screen" />
             </LinearLayout>
+
+            <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="top"
+                    android:background="#C7000000"
+                    android:orientation="horizontal" android:id="@+id/landscape_ll" android:visibility="gone">
+
+                <ImageButton
+                        android:id="@+id/back_image_btn"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@android:color/transparent"
+                        android:padding="9dp"
+                        android:src="@drawable/player_back"/>
+
+                <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="9dp"
+                        android:layout_marginLeft="7dp"
+                        android:layout_marginTop="9dp"
+                        android:layout_weight="1"
+                        android:text="长视频"
+                        android:textColor="@android:color/white"/>
+
+                <ImageButton
+                        android:id="@+id/more_image_btn"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@android:color/transparent"
+                        android:padding="9dp"
+                        android:src="@drawable/more"/>
+            </LinearLayout>
+
         </com.demo.videotest.widget.MediaController>
 
         <ImageView
