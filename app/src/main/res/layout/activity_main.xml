@@ -10,7 +10,7 @@
     <FrameLayout
             android:id="@+id/video_player_frameLayout"
             android:layout_width="match_parent"
-            android:layout_height="250dp">
+            android:layout_height="210dp">
 
         <FrameLayout
                 android:layout_width="match_parent"
@@ -92,8 +92,10 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_gravity="top"
-                    android:background="#C7000000"
-                    android:orientation="horizontal" android:id="@+id/landscape_ll" android:visibility="gone">
+                    android:background="#40000000"
+                    android:orientation="horizontal"
+                    android:id="@+id/landscape_ll"
+                    android:visibility="gone">
 
                 <ImageButton
                         android:id="@+id/back_image_btn"
@@ -110,7 +112,7 @@
                         android:layout_marginLeft="7dp"
                         android:layout_marginTop="9dp"
                         android:layout_weight="1"
-                        android:text="长视频"
+                        android:text="视频名称"
                         android:textColor="@android:color/white"/>
 
                 <ImageButton

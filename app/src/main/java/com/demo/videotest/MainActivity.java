@@ -30,6 +30,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private ImageButton fullScreenImage;
 
+    private ImageButton backButton;
+
     private MediaController mediaController;
 
     private ImageView coverImage;
@@ -97,6 +99,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         landscape_ll = findViewById(R.id.landscape_ll);
 
+        backButton = findViewById(R.id.back_image_btn);
+        backButton.setOnClickListener(this);
+
     }
 
     @Override
@@ -107,10 +112,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     @Override
+    protected void onStop() {
+        super.onStop();
+        player.stopPlayback();
+    }
+
+    @Override
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.full_screen_image:
-                Log.e("TAG", "onClick: ");
                 if (fullScreenStatus == false) {
                     setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
                     fullScreenStatus = true;
@@ -127,17 +137,33 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     stopCurVideoView();
                 }
                 break;
+            case R.id.back_image_btn:
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+                fullScreenStatus = false;
+                break;
             default:
                 break;
         }
     }
 
+    /*
+    *
+    *
+    * 设置播放器参数
+    *
+    * */
     private void resetConfig() {
         player.setRotation(0);
         player.setMirror(false);
         player.setDisplayAspectRatio(PLVideoTextureView.ASPECT_RATIO_PAVED_PARENT);
     }
 
+    /*
+     *
+     *
+     * 设置播放器暂停时的UI
+     *
+     * */
     public void stopCurVideoView() {
         resetConfig();
         player.stopPlayback();
@@ -147,6 +173,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         status = false;
     }
 
+    /*
+     *
+     *
+     * 设置播放器播放时的UI
+     *
+     * */
     public void startCurVideoView() {
         player.start();
         loading.setVisibility(View.VISIBLE);
@@ -159,31 +191,52 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onConfigurationChanged(newConfig);
         switch (newConfig.orientation) {
             case Configuration.ORIENTATION_PORTRAIT:
-                landscape_ll.setVisibility(View.GONE);
-                fullView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
-                getSupportActionBar().show();
-                dm = getResources().getDisplayMetrics();
-                width = dm.widthPixels;
-                height = dm.heightPixels;
-                params = (RelativeLayout.LayoutParams) frameLayout.getLayoutParams();
-                params.width = width;
-                params.height = (int) (300 * dm.density + 0.5f);
-                frameLayout.setLayoutParams(params);
+                setPortrait();
                 break;
             case Configuration.ORIENTATION_LANDSCAPE:
-                landscape_ll.setVisibility(View.VISIBLE);
-                getSupportActionBar().hide();
-                fullView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN);
-                dm = getResources().getDisplayMetrics();
-                width = dm.widthPixels;
-                height = dm.heightPixels;
-                params = (RelativeLayout.LayoutParams) frameLayout.getLayoutParams();
-                params.width = width;
-                params.height = height;
-                frameLayout.setLayoutParams(params);
+                setLandscape();
                 break;
             default:
                 break;
         }
     }
+
+    /*
+    *
+    *
+    * 设置横屏播放器参数
+    *
+    * */
+    private void setLandscape(){
+        landscape_ll.setVisibility(View.VISIBLE);
+        getSupportActionBar().hide();
+        fullView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN);
+        dm = getResources().getDisplayMetrics();
+        width = dm.widthPixels;
+        height = dm.heightPixels;
+        params = (RelativeLayout.LayoutParams) frameLayout.getLayoutParams();
+        params.width = width;
+        params.height = height;
+        frameLayout.setLayoutParams(params);
+    }
+
+    /*
+    *
+    *
+    * 设置竖屏播放器参数
+    *
+    * */
+    private void setPortrait(){
+        landscape_ll.setVisibility(View.GONE);
+        fullView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
+        getSupportActionBar().show();
+        dm = getResources().getDisplayMetrics();
+        width = dm.widthPixels;
+        height = dm.heightPixels;
+        params = (RelativeLayout.LayoutParams) frameLayout.getLayoutParams();
+        params.width = width;
+        params.height = (int) (210 * dm.density + 0.5f);
+        frameLayout.setLayoutParams(params);
+    }
+
 }
