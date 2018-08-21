@@ -3,15 +3,12 @@ package com.demo.videotest;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.net.Uri;
-import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.*;
 import com.demo.videotest.widget.MediaController;
 import com.demo.videotest.widget.PlayConfigView;
@@ -20,7 +17,7 @@ import com.pili.pldroid.player.widget.PLVideoTextureView;
 
 import static com.demo.videotest.utils.Config.LIVE_TEST_URL;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener, View.OnTouchListener {
 
     private FrameLayout frameLayout;
 
@@ -37,6 +34,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private ImageView coverImage;
 
     private ImageButton stopPlayImage;
+
+    private ImageButton moreBtn;
 
     private View loading;
 
@@ -102,6 +101,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         backButton = findViewById(R.id.back_image_btn);
         backButton.setOnClickListener(this);
 
+        moreBtn = findViewById(R.id.more_image_btn);
+        moreBtn.setOnClickListener(this);
+
+        configView = findViewById(R.id.config_view);
+        configView.setOnTouchListener(this);
     }
 
     @Override
@@ -140,6 +144,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.back_image_btn:
                 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
                 fullScreenStatus = false;
+                break;
+            case R.id.more_image_btn:
+                if (configView.getVisibility() == View.GONE) {
+                    configView.setVisibility(View.VISIBLE);
+                } else {
+                    configView.setVisibility(View.GONE);
+                }
                 break;
             default:
                 break;
@@ -218,6 +229,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         params.width = width;
         params.height = height;
         frameLayout.setLayoutParams(params);
+        configView.setVideoView(player);
     }
 
     /*
@@ -239,4 +251,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         frameLayout.setLayoutParams(params);
     }
 
+    @Override
+    public boolean onTouch(View v, MotionEvent event) {
+        switch (v.getId()) {
+            case R.id.config_view:
+                return true;
+            default:
+                break;
+        }
+        return false;
+    }
 }

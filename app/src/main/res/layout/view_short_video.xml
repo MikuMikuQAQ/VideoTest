@@ -24,7 +24,7 @@
         android:background="@drawable/top_title_bg"
         android:orientation="horizontal">
 
-        <com.qiniu.droid.niuplayer.widget.CircleImageView
+        <com.demo.videotest.widget.CircleImageView
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_marginBottom="5dp"

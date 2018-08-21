@@ -157,6 +157,13 @@
                     android:theme="@style/AppThemeProgress" />
         </LinearLayout>
 
+        <com.demo.videotest.widget.PlayConfigView
+                android:id="@+id/config_view"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="right"
+                android:visibility="gone"/>
+
     </FrameLayout>
 
 </RelativeLayout>
