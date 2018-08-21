@@ -22,6 +22,7 @@ import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.demo.videotest.MainActivity;
 import com.demo.videotest.R;
 import com.pili.pldroid.player.IMediaController;
 
@@ -48,6 +49,7 @@ public class MediaController extends FrameLayout implements IMediaController {
     private boolean mInstantSeeking = true;
     private static int sDefaultTimeout = 3000;
     private static final int SEEK_TO_POST_DELAY_MILLIS = 200;
+    private MainActivity mainActivity = (MainActivity) getContext();
 
     private static final int FADE_OUT = 1;
     private static final int SHOW_PROGRESS = 2;
@@ -394,10 +396,17 @@ public class MediaController extends FrameLayout implements IMediaController {
     }
 
     private void doPauseResume() {
-        if (mPlayer.isPlaying())
+        if (mPlayer.isPlaying()) {
             mPlayer.pause();
-        else
+            mainActivity.danmakuView.pause();
+            mainActivity.status = false;
+        }
+        else{
             mPlayer.start();
+            mainActivity.status = true;
+            mainActivity.randomDanmakuText();
+            mainActivity.danmakuView.start();
+        }
         updatePausePlay();
     }
 

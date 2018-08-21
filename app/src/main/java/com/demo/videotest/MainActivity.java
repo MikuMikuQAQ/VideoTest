@@ -7,13 +7,11 @@ import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.*;
 import com.demo.videotest.widget.MediaController;
 import com.demo.videotest.widget.PlayConfigView;
-import com.google.gson.Gson;
 import com.pili.pldroid.player.PLOnInfoListener;
 import com.pili.pldroid.player.widget.PLVideoTextureView;
 import master.flame.danmaku.controller.DrawHandler;
@@ -23,16 +21,16 @@ import master.flame.danmaku.danmaku.model.IDanmakus;
 import master.flame.danmaku.danmaku.model.android.DanmakuContext;
 import master.flame.danmaku.danmaku.model.android.Danmakus;
 import master.flame.danmaku.danmaku.parser.BaseDanmakuParser;
-import master.flame.danmaku.ui.widget.DanmakuTextureView;
 import master.flame.danmaku.ui.widget.DanmakuView;
 
+import java.util.HashMap;
 import java.util.Random;
 
 import static com.demo.videotest.utils.Config.LIVE_TEST_URL;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, View.OnTouchListener, PLOnInfoListener {
 
-    private DanmakuView danmakuView;
+    public DanmakuView danmakuView;
 
     private DanmakuContext danmakuContext;
 
@@ -58,7 +56,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private View fullView;
 
-    private boolean status = false;
+    public boolean status = false;
 
     private boolean fullScreenStatus = false;
 
@@ -89,44 +87,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_main);
         getDisplayInfo();
         fullView = getWindow().getDecorView();
-        //初始化播放界面
-        player = (PLVideoTextureView) findViewById(R.id.video_texture_view);
+
+        initCreateView();
+
         //初始化播放控制器
-        mediaController = findViewById(R.id.media_controller);
         player.setMediaController(mediaController);
         //设置播放地址
         player.setVideoURI(Uri.parse(LIVE_TEST_URL));
         //设置视频缓冲动画
-        loading = findViewById(R.id.loading_view);
         player.setBufferingIndicator(loading);
         //铺满全屏
         player.setDisplayAspectRatio(PLVideoTextureView.ASPECT_RATIO_PAVED_PARENT);
-        //设置视频播放监听
-        player.setOnInfoListener(this);
 
-        frameLayout = (FrameLayout) findViewById(R.id.video_player_frameLayout);
+        initCreateListener();
 
-        fullScreenImage = findViewById(R.id.full_screen_image);
-        fullScreenImage.setOnClickListener(this);
-
-        coverImage = findViewById(R.id.cover_image);
-        coverImage.setOnClickListener(this);
-
-        stopPlayImage = findViewById(R.id.cover_stop_play);
-
-        landscape_ll = findViewById(R.id.landscape_ll);
-
-        backButton = findViewById(R.id.back_image_btn);
-        backButton.setOnClickListener(this);
-
-        moreBtn = findViewById(R.id.more_image_btn);
-        moreBtn.setOnClickListener(this);
-
-        configView = findViewById(R.id.config_view);
-        configView.setOnTouchListener(this);
-
-        danmakuView = findViewById(R.id.danmaku_view);
-        danmakuView.enableDanmakuDrawingCache(true);
         danmakuView.setCallback(new DrawHandler.Callback() {
             @Override
             public void prepared() {
@@ -151,7 +125,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             }
         });
-        danmakuContext = DanmakuContext.create();
+        setDanmakuStyle();
         danmakuView.prepare(parser, danmakuContext);
     }
 
@@ -203,19 +177,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.cover_image:
                 //判断视频是否在播放
-                if (!status) {
-                    status = true;
-                    danmakuView.start();
-                    startCurVideoView();
-                    randomDanmakuText();
-                    Log.e("TAG", "onClick: " + status);
-                } /*else {
-                    status = false;
-                    danmakuView.pause();
-                    stopCurVideoView();
-                    Log.e("TAG", "onClick: " + status);
-                }*/
-
+                status = true;
+                startCurVideoView();
+                randomDanmakuText();
                 break;
             case R.id.back_image_btn:
                 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
@@ -268,32 +232,46 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    /*
-     *
-     *
-     * 设置播放器参数
-     *
-     * */
-    private void resetConfig() {
-        player.setRotation(0);
-        player.setMirror(false);
-        player.setDisplayAspectRatio(PLVideoTextureView.ASPECT_RATIO_PAVED_PARENT);
+    private void initCreateView(){
+        //初始化播放界面
+        player = (PLVideoTextureView) findViewById(R.id.video_texture_view);
+        mediaController = findViewById(R.id.media_controller);
+        loading = findViewById(R.id.loading_view);
+        fullScreenImage = findViewById(R.id.full_screen_image);
+        frameLayout = (FrameLayout) findViewById(R.id.video_player_frameLayout);
+        coverImage = findViewById(R.id.cover_image);
+        stopPlayImage = findViewById(R.id.cover_stop_play);
+        landscape_ll = findViewById(R.id.landscape_ll);
+        backButton = findViewById(R.id.back_image_btn);
+        moreBtn = findViewById(R.id.more_image_btn);
+        configView = findViewById(R.id.config_view);
+        danmakuView = findViewById(R.id.danmaku_view);
     }
 
-    /*
-     *
-     *
-     * 设置播放器暂停时的UI
-     *
-     * */
-    /*public void stopCurVideoView() {
-        resetConfig();
-        player.stopPlayback();
-        loading.setVisibility(View.GONE);
-        coverImage.setVisibility(View.VISIBLE);
-        stopPlayImage.setVisibility(View.VISIBLE);
-        //status = false;
-    }*/
+    private void initCreateListener(){
+        player.setOnInfoListener(this);
+        fullScreenImage.setOnClickListener(this);
+        coverImage.setOnClickListener(this);
+        backButton.setOnClickListener(this);
+        moreBtn.setOnClickListener(this);
+        configView.setOnTouchListener(this);
+        danmakuView.enableDanmakuDrawingCache(true);
+    }
+
+    private void setDanmakuStyle() {
+        HashMap<Integer, Integer> maxLines = new HashMap<Integer, Integer>();
+        maxLines.put(BaseDanmaku.TYPE_SCROLL_RL, 5);
+
+        HashMap<Integer, Boolean> noOverlap = new HashMap<Integer, Boolean>();
+        noOverlap.put(BaseDanmaku.TYPE_SCROLL_RL, true);
+        noOverlap.put(BaseDanmaku.TYPE_FIX_BOTTOM, true);
+        noOverlap.put(BaseDanmaku.TYPE_FIX_TOP, true);
+        noOverlap.put(BaseDanmaku.TYPE_SCROLL_LR, true);
+
+        danmakuContext = DanmakuContext.create();
+        danmakuContext.setMaximumLines(maxLines)
+                .preventOverlapping(noOverlap);
+    }
 
     /*
      *
@@ -303,9 +281,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      * */
     public void startCurVideoView() {
         player.start();
+        danmakuView.start();
         loading.setVisibility(View.VISIBLE);
         stopPlayImage.setVisibility(View.GONE);
-        //status = true;
     }
 
     /*
@@ -346,13 +324,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         baseDanmaku.text = content;
         baseDanmaku.padding = 5;
         baseDanmaku.textSize = changeNum(18, PX_TO_SP);
-        baseDanmaku.textColor = Color.RED;
+        baseDanmaku.textColor = randomColor();
+        baseDanmaku.isLive = true;
         baseDanmaku.setTime(danmakuView.getCurrentTime());
         if (userText) {
             baseDanmaku.borderColor = Color.GREEN;
         }
-        //Log.e("TAG", "showDanmaku: "+ new Gson().toJson(baseDanmaku));
         danmakuView.addDanmaku(baseDanmaku);
+    }
+
+    private int randomColor() {
+        Random random = new Random();
+        int r = random.nextInt(256);
+        int g = random.nextInt(256);
+        int b = random.nextInt(256);
+        return Color.rgb(r, g, b);
     }
 
     private void getDisplayInfo() {
@@ -372,7 +358,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    private void randomDanmakuText() {
+    public void randomDanmakuText() {
         new Thread(new Runnable() {
             @Override
             public void run() {
