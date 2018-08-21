@@ -2,6 +2,7 @@ package com.demo.videotest;
 
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.graphics.Color;
 import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -12,12 +13,28 @@ import android.view.View;
 import android.widget.*;
 import com.demo.videotest.widget.MediaController;
 import com.demo.videotest.widget.PlayConfigView;
+import com.google.gson.Gson;
 import com.pili.pldroid.player.PLOnInfoListener;
 import com.pili.pldroid.player.widget.PLVideoTextureView;
+import master.flame.danmaku.controller.DrawHandler;
+import master.flame.danmaku.danmaku.model.BaseDanmaku;
+import master.flame.danmaku.danmaku.model.DanmakuTimer;
+import master.flame.danmaku.danmaku.model.IDanmakus;
+import master.flame.danmaku.danmaku.model.android.DanmakuContext;
+import master.flame.danmaku.danmaku.model.android.Danmakus;
+import master.flame.danmaku.danmaku.parser.BaseDanmakuParser;
+import master.flame.danmaku.ui.widget.DanmakuTextureView;
+import master.flame.danmaku.ui.widget.DanmakuView;
+
+import java.util.Random;
 
 import static com.demo.videotest.utils.Config.LIVE_TEST_URL;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener, View.OnTouchListener {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener, View.OnTouchListener, PLOnInfoListener {
+
+    private DanmakuView danmakuView;
+
+    private DanmakuContext danmakuContext;
 
     private FrameLayout frameLayout;
 
@@ -53,20 +70,30 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private int height;
 
+    private final int PX_TO_SP = 0;
+
+    private final int PX_TO_DP = 1;
+
     private LinearLayout landscape_ll;
 
-
+    private BaseDanmakuParser parser = new BaseDanmakuParser() {
+        @Override
+        protected IDanmakus parse() {
+            return new Danmakus();
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        getDisplayInfo();
         fullView = getWindow().getDecorView();
         //初始化播放界面
         player = (PLVideoTextureView) findViewById(R.id.video_texture_view);
         //初始化播放控制器
         mediaController = findViewById(R.id.media_controller);
-        player.setMediaController(mediaController );
+        player.setMediaController(mediaController);
         //设置播放地址
         player.setVideoURI(Uri.parse(LIVE_TEST_URL));
         //设置视频缓冲动画
@@ -75,16 +102,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         //铺满全屏
         player.setDisplayAspectRatio(PLVideoTextureView.ASPECT_RATIO_PAVED_PARENT);
         //设置视频播放监听
-        player.setOnInfoListener(new PLOnInfoListener() {
-            @Override
-            public void onInfo(int i, int i1) {
-                if (i == PLOnInfoListener.MEDIA_INFO_VIDEO_RENDERING_START) {
-                    coverImage.setVisibility(View.GONE);
-                    stopPlayImage.setVisibility(View.GONE);
-                    mediaController.hide();
-                }
-            }
-        });
+        player.setOnInfoListener(this);
 
         frameLayout = (FrameLayout) findViewById(R.id.video_player_frameLayout);
 
@@ -106,6 +124,35 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         configView = findViewById(R.id.config_view);
         configView.setOnTouchListener(this);
+
+        danmakuView = findViewById(R.id.danmaku_view);
+        danmakuView.enableDanmakuDrawingCache(true);
+        danmakuView.setCallback(new DrawHandler.Callback() {
+            @Override
+            public void prepared() {
+                /*showDanmakuStatus = true;
+                danmakuView.start();
+                Log.e("TAG", "prepared: " );
+                randomDanmakuText();*/
+            }
+
+            @Override
+            public void updateTimer(DanmakuTimer timer) {
+
+            }
+
+            @Override
+            public void danmakuShown(BaseDanmaku danmaku) {
+
+            }
+
+            @Override
+            public void drawingFinished() {
+
+            }
+        });
+        danmakuContext = DanmakuContext.create();
+        danmakuView.prepare(parser, danmakuContext);
     }
 
     @Override
@@ -113,6 +160,27 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onDestroy();
         //程序关闭后自动停止播放
         player.stopPlayback();
+        status = false;
+        if (danmakuView != null) {
+            danmakuView.release();
+            danmakuView = null;
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (danmakuView != null && danmakuView.isPrepared()) {
+            danmakuView.pause();
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (danmakuView != null && danmakuView.isPrepared() && danmakuView.isPaused()) {
+            danmakuView.resume();
+        }
     }
 
     @Override
@@ -135,11 +203,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.cover_image:
                 //判断视频是否在播放
-                if (status == false) {
+                if (!status) {
+                    status = true;
+                    danmakuView.start();
                     startCurVideoView();
-                } else {
+                    randomDanmakuText();
+                    Log.e("TAG", "onClick: " + status);
+                } /*else {
+                    status = false;
+                    danmakuView.pause();
                     stopCurVideoView();
-                }
+                    Log.e("TAG", "onClick: " + status);
+                }*/
+
                 break;
             case R.id.back_image_btn:
                 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
@@ -157,44 +233,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    /*
-    *
-    *
-    * 设置播放器参数
-    *
-    * */
-    private void resetConfig() {
-        player.setRotation(0);
-        player.setMirror(false);
-        player.setDisplayAspectRatio(PLVideoTextureView.ASPECT_RATIO_PAVED_PARENT);
+    @Override
+    public void onInfo(int i, int i1) {
+        if (i == PLOnInfoListener.MEDIA_INFO_VIDEO_RENDERING_START) {
+            coverImage.setVisibility(View.GONE);
+            stopPlayImage.setVisibility(View.GONE);
+            mediaController.hide();
+        }
     }
 
-    /*
-     *
-     *
-     * 设置播放器暂停时的UI
-     *
-     * */
-    public void stopCurVideoView() {
-        resetConfig();
-        player.stopPlayback();
-        loading.setVisibility(View.GONE);
-        coverImage.setVisibility(View.VISIBLE);
-        stopPlayImage.setVisibility(View.VISIBLE);
-        status = false;
-    }
-
-    /*
-     *
-     *
-     * 设置播放器播放时的UI
-     *
-     * */
-    public void startCurVideoView() {
-        player.start();
-        loading.setVisibility(View.VISIBLE);
-        stopPlayImage.setVisibility(View.GONE);
-        status = true;
+    @Override
+    public boolean onTouch(View v, MotionEvent event) {
+        switch (v.getId()) {
+            case R.id.config_view:
+                return true;
+            default:
+                break;
+        }
+        return false;
     }
 
     @Override
@@ -213,52 +269,125 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     /*
-    *
-    *
-    * 设置横屏播放器参数
-    *
-    * */
-    private void setLandscape(){
+     *
+     *
+     * 设置播放器参数
+     *
+     * */
+    private void resetConfig() {
+        player.setRotation(0);
+        player.setMirror(false);
+        player.setDisplayAspectRatio(PLVideoTextureView.ASPECT_RATIO_PAVED_PARENT);
+    }
+
+    /*
+     *
+     *
+     * 设置播放器暂停时的UI
+     *
+     * */
+    /*public void stopCurVideoView() {
+        resetConfig();
+        player.stopPlayback();
+        loading.setVisibility(View.GONE);
+        coverImage.setVisibility(View.VISIBLE);
+        stopPlayImage.setVisibility(View.VISIBLE);
+        //status = false;
+    }*/
+
+    /*
+     *
+     *
+     * 设置播放器播放时的UI
+     *
+     * */
+    public void startCurVideoView() {
+        player.start();
+        loading.setVisibility(View.VISIBLE);
+        stopPlayImage.setVisibility(View.GONE);
+        //status = true;
+    }
+
+    /*
+     *
+     *
+     * 设置横屏播放器参数
+     *
+     * */
+    private void setLandscape() {
         landscape_ll.setVisibility(View.VISIBLE);
         getSupportActionBar().hide();
         fullView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN);
-        dm = getResources().getDisplayMetrics();
-        width = dm.widthPixels;
-        height = dm.heightPixels;
         params = (RelativeLayout.LayoutParams) frameLayout.getLayoutParams();
-        params.width = width;
-        params.height = height;
+        params.width = height;
+        params.height = width;
         frameLayout.setLayoutParams(params);
         configView.setVideoView(player);
     }
 
     /*
-    *
-    *
-    * 设置竖屏播放器参数
-    *
-    * */
-    private void setPortrait(){
+     *
+     *
+     * 设置竖屏播放器参数
+     *
+     * */
+    private void setPortrait() {
         landscape_ll.setVisibility(View.GONE);
         fullView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
         getSupportActionBar().show();
-        dm = getResources().getDisplayMetrics();
-        width = dm.widthPixels;
-        height = dm.heightPixels;
         params = (RelativeLayout.LayoutParams) frameLayout.getLayoutParams();
         params.width = width;
-        params.height = (int) (210 * dm.density + 0.5f);
+        params.height = changeNum(210, PX_TO_DP);
         frameLayout.setLayoutParams(params);
     }
 
-    @Override
-    public boolean onTouch(View v, MotionEvent event) {
-        switch (v.getId()) {
-            case R.id.config_view:
-                return true;
-            default:
-                break;
+    private void showDanmaku(String content, boolean userText) {
+        BaseDanmaku baseDanmaku = danmakuContext.mDanmakuFactory.createDanmaku(BaseDanmaku.TYPE_SCROLL_RL, danmakuContext);
+        baseDanmaku.text = content;
+        baseDanmaku.padding = 5;
+        baseDanmaku.textSize = changeNum(18, PX_TO_SP);
+        baseDanmaku.textColor = Color.RED;
+        baseDanmaku.setTime(danmakuView.getCurrentTime());
+        if (userText) {
+            baseDanmaku.borderColor = Color.GREEN;
         }
-        return false;
+        //Log.e("TAG", "showDanmaku: "+ new Gson().toJson(baseDanmaku));
+        danmakuView.addDanmaku(baseDanmaku);
+    }
+
+    private void getDisplayInfo() {
+        dm = getResources().getDisplayMetrics();
+        width = dm.widthPixels;
+        height = dm.heightPixels;
+    }
+
+    private int changeNum(float num, int kind) {
+        switch (kind) {
+            case PX_TO_SP:
+                return (int) (num * dm.scaledDensity + 0.5f);
+            case PX_TO_DP:
+                return (int) (num * dm.density + 0.5f);
+            default:
+                return 0;
+        }
+    }
+
+    private void randomDanmakuText() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (status) {
+                    //Log.e("TAG", "run: " + status );
+                    int time = new Random().nextInt(300);
+                    String content = "" + time + time;
+                    showDanmaku(content, false);
+                    try {
+                        Thread.sleep(time);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }).start();
     }
 }
