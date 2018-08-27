@@ -28,9 +28,13 @@ import java.util.Random;
 
 import static com.demo.videotest.utils.Config.LIVE_TEST_URL;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener, View.OnTouchListener, PLOnInfoListener {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener, View.OnTouchListener, PLOnInfoListener, View.OnFocusChangeListener {
 
     public DanmakuView danmakuView;
+
+    private EditText danmakuEdit;
+
+    private ImageButton danmakuSwitch;
 
     private DanmakuContext danmakuContext;
 
@@ -104,10 +108,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         danmakuView.setCallback(new DrawHandler.Callback() {
             @Override
             public void prepared() {
-                /*showDanmakuStatus = true;
-                danmakuView.start();
-                Log.e("TAG", "prepared: " );
-                randomDanmakuText();*/
+
             }
 
             @Override
@@ -147,6 +148,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (danmakuView != null && danmakuView.isPrepared()) {
             danmakuView.pause();
         }
+        if (player.isPlaying()) {
+            player.pause();
+        }
     }
 
     @Override
@@ -160,7 +164,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onStop() {
         super.onStop();
-        player.stopPlayback();
+        if (player.isPlaying()) {
+            player.stopPlayback();
+        }
     }
 
     @Override
@@ -176,7 +182,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
                 break;
             case R.id.cover_image:
-                //判断视频是否在播放
                 status = true;
                 startCurVideoView();
                 randomDanmakuText();
@@ -232,13 +237,28 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+    @Override
+    public void onFocusChange(View v, boolean hasFocus) {
+        switch (v.getId()) {
+            case R.id.danmaku_edit:
+                if (hasFocus) {
+                    mediaController.mPlayer.pause();
+                } else {
+                    mediaController.mPlayer.start();
+                }
+                break;
+            default:
+                break;
+        }
+    }
+
     private void initCreateView(){
         //初始化播放界面
-        player = (PLVideoTextureView) findViewById(R.id.video_texture_view);
+        player = findViewById(R.id.video_texture_view);
         mediaController = findViewById(R.id.media_controller);
         loading = findViewById(R.id.loading_view);
         fullScreenImage = findViewById(R.id.full_screen_image);
-        frameLayout = (FrameLayout) findViewById(R.id.video_player_frameLayout);
+        frameLayout = findViewById(R.id.video_player_frameLayout);
         coverImage = findViewById(R.id.cover_image);
         stopPlayImage = findViewById(R.id.cover_stop_play);
         landscape_ll = findViewById(R.id.landscape_ll);
@@ -246,6 +266,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         moreBtn = findViewById(R.id.more_image_btn);
         configView = findViewById(R.id.config_view);
         danmakuView = findViewById(R.id.danmaku_view);
+        danmakuEdit = findViewById(R.id.danmaku_edit);
+        danmakuSwitch = findViewById(R.id.danmaku_switch);
     }
 
     private void initCreateListener(){
@@ -256,6 +278,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         moreBtn.setOnClickListener(this);
         configView.setOnTouchListener(this);
         danmakuView.enableDanmakuDrawingCache(true);
+        danmakuEdit.setOnFocusChangeListener(this);
+        danmakuSwitch.setOnClickListener(this);
     }
 
     private void setDanmakuStyle() {

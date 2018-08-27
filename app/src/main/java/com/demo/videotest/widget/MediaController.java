@@ -35,7 +35,7 @@ import java.util.Locale;
 public class MediaController extends FrameLayout implements IMediaController {
 
     private static final String TAG = "PLMediaController";
-    private MediaPlayerControl mPlayer;
+    public MediaPlayerControl mPlayer;
     private Context mContext;
     private PopupWindow mWindow;
     private int mAnimStyle;
@@ -47,7 +47,7 @@ public class MediaController extends FrameLayout implements IMediaController {
     private boolean mShowing;
     private boolean mDragging;
     private boolean mInstantSeeking = true;
-    private static int sDefaultTimeout = 3000;
+    private static int sDefaultTimeout = 10000;
     private static final int SEEK_TO_POST_DELAY_MILLIS = 200;
     private MainActivity mainActivity = (MainActivity) getContext();
 
@@ -405,7 +405,7 @@ public class MediaController extends FrameLayout implements IMediaController {
             mPlayer.start();
             mainActivity.status = true;
             mainActivity.randomDanmakuText();
-            mainActivity.danmakuView.start();
+            mainActivity.danmakuView.start(3);
         }
         updatePausePlay();
     }

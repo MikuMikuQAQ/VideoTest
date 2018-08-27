@@ -48,50 +48,96 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical|bottom"
                     android:background="#40000000"
-                    android:orientation="horizontal">
+                    android:orientation="vertical">
 
-                <TextView
-                        android:id="@+id/controller_current_time"
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:layout_gravity="center_horizontal"
-                        android:gravity="center_vertical"
-                        android:paddingEnd="4dip"
-                        android:paddingStart="4dip"
-                        android:textColor="@android:color/white"
-                        android:textSize="14sp"
-                        android:textStyle="bold"/>
-
-                <SeekBar
-                        android:id="@+id/controller_progress_bar"
-                        style="?android:attr/progressBarStyleHorizontal"
-                        android:layout_width="0dip"
-                        android:layout_height="32dip"
-                        android:layout_alignParentLeft="true"
-                        android:layout_alignParentRight="true"
-                        android:layout_weight="1"/>
-
-                <TextView
-                        android:id="@+id/controller_end_time"
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:layout_gravity="center_horizontal"
-                        android:gravity="center_vertical"
-                        android:paddingEnd="4dip"
-                        android:paddingStart="4dip"
-                        android:textColor="@android:color/white"
-                        android:textSize="14sp"
-                        android:textStyle="bold"/>
-
-                <ImageButton
-                        android:id="@+id/full_screen_image"
-                        android:layout_width="wrap_content"
+                <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:layout_marginLeft="5dp"
-                        android:layout_marginRight="5dp"
-                        android:background="@android:color/transparent"
-                        android:src="@drawable/full_screen"/>
+                        android:orientation="horizontal">
+
+                    <TextView
+                            android:id="@+id/controller_current_time"
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:layout_gravity="center_horizontal"
+                            android:gravity="center_vertical"
+                            android:paddingEnd="4dip"
+                            android:paddingStart="4dip"
+                            android:textColor="@android:color/white"
+                            android:textSize="14sp"
+                            android:textStyle="bold"/>
+
+                    <SeekBar
+                            android:id="@+id/controller_progress_bar"
+                            style="?android:attr/progressBarStyleHorizontal"
+                            android:layout_width="0dip"
+                            android:layout_height="32dip"
+                            android:layout_alignParentLeft="true"
+                            android:layout_alignParentRight="true"
+                            android:layout_weight="1"/>
+
+                    <TextView
+                            android:id="@+id/controller_end_time"
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:layout_gravity="center_horizontal"
+                            android:gravity="center_vertical"
+                            android:paddingEnd="4dip"
+                            android:paddingStart="4dip"
+                            android:textColor="@android:color/white"
+                            android:textSize="14sp"
+                            android:textStyle="bold"/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                    <ImageButton
+                            android:id="@+id/danmaku_switch"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:layout_marginLeft="5dp"
+                            android:layout_marginRight="5dp"
+                            android:background="@android:color/transparent"
+                            android:src="@drawable/ic_danmaku_on"/>
+
+                    <EditText
+                            android:id="@+id/danmaku_edit"
+                            android:layout_width="wrap_content"
+                            android:layout_height="32dp"
+                            style="?android:attr/progressBarStyleHorizontal"
+                            android:layout_alignParentLeft="true"
+                            android:layout_alignParentRight="true"
+                            android:textColor="#fff"
+                            android:textSize="18sp"
+                            android:layout_weight="1"/>
+
+                    <ImageButton
+                            android:id="@+id/danmaku_send"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:layout_marginLeft="5dp"
+                            android:layout_marginRight="5dp"
+                            android:background="@android:color/transparent"
+                            android:src="@drawable/ic_danmaku_send"/>
+
+                    <ImageButton
+                            android:id="@+id/full_screen_image"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:layout_marginLeft="5dp"
+                            android:layout_marginRight="5dp"
+                            android:background="@android:color/transparent"
+                            android:src="@drawable/full_screen"/>
+
+                </LinearLayout>
+
             </LinearLayout>
 
             <LinearLayout
@@ -162,6 +208,7 @@
                 android:layout_height="match_parent"
                 android:adjustViewBounds="true"
                 android:scaleType="centerCrop"/>
+
         <com.demo.videotest.widget.PlayConfigView
                 android:id="@+id/config_view"
                 android:layout_width="wrap_content"
